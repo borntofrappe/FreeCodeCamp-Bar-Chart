@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
+
+// include design choices in terms of font and colors
+font = 'Montserrat', sans-serif
+// the page uses a single color palette, with darker variations for text and the bars of the bar chart
+// swapping the background value here defined will allow for different visuals
+background = #3F2159
+card = #f5f5f5
+theme = darken(background, 30%)
+
+*
+    box-sizing border-box
+    margin 0
+    padding 0
+
+body
+    min-height 100vh
+    width 100%
+    padding 0 1rem
+    font-family font
+    color theme
+    background background
+    
+#card
+    // limit the width of the svg 
+    max-width 900px
+    // separate the card from the vertical edges of the page
+    margin 2rem auto
+    // include some padding to separate the content from the border of the #card container
+    padding 1rem
+    border-radius 12px
+    background card
+    // include a simple animation which introduces the card from the bottom of the screen
+    animation introduceCard 1s cubic-bezier(.22,-0.3,.68,1.44) both 
+
+    svg 
+        // style the rectangle elements with a dark fill, which is altered on hover to be even darker
+        .bar 
+            fill darken(theme, 20%)
+            &:hover
+                fill darken(theme, 70%)
+        
+    #title 
+        // style the title to be boldly displayed atop the chart
+        font-size 3rem
+        text-transform capitalize
+        text-align center
+        // include a simple animation which introduces the title from the top of the screen, right before the card has finised animating 
+        animation introduceTitle 0.5s 0.8s cubic-bezier(.22,-0.3,.68,1.44) both 
+
+        
+// define the animations to introduce title and a card element
+@keyframes introduceTitle 
+    0%
+        transform translateY(-20vh)
+        opacity 0
+    50%
+        opacity 0
+    100%
+        transform translateY(0)
+        opacity 1
+
+@keyframes introduceCard
+    0%
+        transform translateY(100vh)
+        opacity 0
+    50%
+        opacity 0
+    100%
+        opacity 1
+        transform translateY(0)
+
+// on scmaller screen sizes, reduce the font-size of the header
+@media (max-width: 700px) 
+    #card #title
+        font-size 2rem
