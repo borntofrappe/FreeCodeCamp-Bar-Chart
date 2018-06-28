@@ -155,8 +155,11 @@ function drawRectangles(data) {
         // important: the event listener accepts as argument the data being processed (d), which is then used in the text of the tooltip
         .on("mouseover", (d) => {
             tooltip
+                // add a data-date attribute remarking the date value which id displayed on the tooltip
+                .attr("data-date", d[0])
                 // alter the opacity to make the tooltip visible
                 .style("opacity", 1)
+                .style("visibility", "visible")
                 // position the tooltip close to the cursor, using the d3.event object
                 // console.log() this object to establish which properties are needed
                 .style("left", `${d3.event.layerX - 100}px`)

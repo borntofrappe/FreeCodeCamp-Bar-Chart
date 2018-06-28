@@ -46,6 +46,7 @@ body {
   position: absolute;
   z-index: 10;
   opacity: 0;
+  visibillity: hidden;
   transition: all 0.2s ease-out;
 }
 @media (max-width: 700px) {
