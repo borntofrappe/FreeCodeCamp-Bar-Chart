@@ -136,7 +136,7 @@ function drawRectangles(data) {
         .attr("class", "x-axis-label");
 
     // include one rectangle for each data point
-    const rectangles = containerSVG
+    containerSVG
         // select all elements
         .selectAll("rect")
         // include data and however many rectangles are required by the json object
@@ -166,9 +166,12 @@ function drawRectangles(data) {
                 .style("top", `${d3.event.layerY - 150}px`)
                 .text(() => {
                     // display with text the year and the respective value in terms of GDP
-                    let textYear = d[0].substring(0,4);
+                    let textDate = d[0];
+                    let textYear = textDate.substring(0,4);
+                    let textMonth = textDate.substring(5,7);
+                    let textTrimester = (textMonth == "01") ? "Q1" : (textMonth == "04") ? "Q2" : (textMonth == "07") ? "Q3" : "Q4";
                     let textGdp = d[1];
-                    return `${textYear} GDP: ${textGdp}`;
+                    return `${textYear} ${textTrimester} GDP: $${textGdp}`;
                 });
         })
         // on mouseleave change the opacity back to 0
