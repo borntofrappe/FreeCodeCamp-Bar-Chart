@@ -39,7 +39,13 @@ body
             fill darken(theme, 20%)
             &:hover
                 fill darken(theme, 70%)
-        
+
+        .x-axis-label
+            // translate the tick of the x-axis slightly below the axis itself, and to the left of the respective mark
+            // rotate them to show them vertically 
+            // order matters: including the rotation before the translation delivers a different result, as the coordinate system is altered, and a new X and Y dimensions are computed
+            transform translateY(20px) translateX(-20px) rotate(-90deg) 
+
     h1#title 
         // style the title to be boldly displayed atop the chart
         font-size 3rem

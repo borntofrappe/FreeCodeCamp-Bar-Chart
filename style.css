@@ -9,8 +9,8 @@ body {
   width: 100%;
   padding: 0 1rem;
   font-family: 'Encode Sans Semi Expanded', sans-serif;
-  color: #2c173e;
-  background: #3f2159;
+  color: #bb7207;
+  background: #f79f1d;
 }
 .container {
   max-width: 900px;
@@ -21,10 +21,13 @@ body {
   animation: introduceCard 1s cubic-bezier(0.22, -0.3, 0.68, 1.44) both;
 }
 .container svg .bar {
-  fill: #231232;
+  fill: #965b06;
 }
 .container svg .bar:hover {
-  fill: #0d0713;
+  fill: #382202;
+}
+.container svg .x-axis-label {
+  transform: translateY(20px) translateX(-20px) rotate(-90deg);
 }
 .container h1#title {
   font-size: 3rem;

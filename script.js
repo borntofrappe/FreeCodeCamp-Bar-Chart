@@ -73,7 +73,8 @@ function drawRectangles(data) {
                     .range([h - offset, offset]);
 
     // create a vertical axis with ticks matching the value of the GPD data
-    const yAxis = d3.axisLeft(yScale);
+    const yAxis = d3
+                    .axisLeft(yScale);
 
     containerSVG
         // include a group element in which to include the y axis
@@ -88,29 +89,35 @@ function drawRectangles(data) {
         .call(yAxis);
 
 
-
     // create a scale used for the x axis
-    // domain: from 1947-01-01 up to 2015-01-01
-    // range: 0, width - offset
+    // the x-axis ought to display the years of the GDP data, with labels for 1950, 1955, 1960
     // the different ticks are to be included in the x axis, from 0 up to the width of the SVG
-    // with which is deducted the measure included by the padding for the y-axis
+    // this is achieved through a different scale, _scalePoint_
 
-    // // store in an array the years provided in the date value
-    // const years = [];
-    // // increment by 4 to skip one year at each iteration (there are four trimesters, which would repeat the year value)
-    // for(let i = 0; i < data.length; i+=4) {
-    //     // consider only the year, which is found in the first 4 characters
-    //     years.push(data[i][0].substring(0,4));
-    // }
+    // store in an array the years provided in the date value
+    const years = [];
+    // increment by 4 to skip one year at each iteration (there are four trimesters, which would repeat the year value)
+    for(let i = 0; i < data.length; i+=4) {
+        years.push(data[i][0]);
+    }
 
-    // with domain set to the range given by the smallest and biggest year, the scale plots the items hozirontally according to a the range() method
+    // domain: the years from 1949 to 2015
+    // range: the space which is allocated for the years
+    // scalePoint allows to include a tick for each item of the array which is included in the domain function, in the space described by the range function0
     const xScale = d3
-                    .scaleLinear()
-                    .domain([d3.min(data, (d) => d[0]), d3.max(data, (d) => d[0])])
+                    .scalePoint()
+                    .domain(years)
                     .range([0, w - offset]);
 
     // create an horizontal axis and include it through a group element, much alike the vertical counterpart
-    const xAxis = d3.axisBottom(xScale);
+    const xAxis = d3
+                    .axisBottom(xScale);
+    // modify the format of the ticks, as to display only every five year starting from 1950 (1950,1955...)
+    xAxis.tickFormat((tick) => {
+        // include the year for the prescribed dates, otherwise include empty text 
+        let year = tick.substring(0,4);
+        return (year % 5 == 0) ? year : ""; 
+    });
 
     containerSVG
         .append("g")
@@ -122,7 +129,11 @@ function drawRectangles(data) {
         .delay(4000)
         // move the axis to its rightful position, translated horizontally by the padding added for the y-axis, translated vertically by the same padding, but included to show the ticks of the axis itself (as these would be cropped out of the SVG canvas, being drawn below the axis)
         .attr("transform", `translate(${offset}, ${h - offset})`)
-        .call(xAxis);
+        .call(xAxis)
+        // select all text elements of the x-axis (the ticks of the axes include text through a text element)
+        .selectAll("text")
+        // give a class to style the tex of the x-axis (to show the text vertically)
+        .attr("class", "x-axis-label");
 
     // include one rectangle for each data point
     containerSVG
