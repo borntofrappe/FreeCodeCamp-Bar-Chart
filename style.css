@@ -36,10 +36,24 @@ body {
   text-align: center;
   animation: introduceTitle 0.5s 0.8s cubic-bezier(0.22, -0.3, 0.68, 1.44) both;
 }
+div.tooltip {
+  position: absolute;
+  opacity: 0;
+  z-index: 10;
+  transition: all 0.2s ease-out;
+  background: #fff;
+  padding: 1rem 2rem;
+  font-size: 2rem;
+  border-radius: 12px;
+  filter: drop-shadow(0 2px 5px #f79f1d);
+}
 @media (max-width: 700px) {
   .container h1#title {
     font-size: 2rem;
   }
+}
+.container div.tooltip {
+  font-size: 1rem;
 }
 @-moz-keyframes introduceTitle {
   0% {

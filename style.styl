@@ -55,6 +55,18 @@ body
         // include a simple animation which introduces the title from the top of the screen, right before the card has finised animating 
         animation introduceTitle 0.5s 0.8s cubic-bezier(.22,-0.3,.68,1.44) both 
 
+// TODO comment tooltip style
+    div.tooltip
+        position absolute 
+        opacity 0
+        z-index 10
+        transition all 0.2s ease-out
+        background white 
+        padding 1rem 2rem 
+        font-size 2rem 
+        border-radius 12px
+        filter drop-shadow(0 2px 5px background)
+
         
 // define the animations to introduce title and a card element
 @keyframes introduceTitle 
@@ -81,3 +93,6 @@ body
 @media (max-width: 700px) 
     .container h1#title
         font-size 2rem
+// TODO comment tooltip style
+    .container div.tooltip
+        font-size 1rem

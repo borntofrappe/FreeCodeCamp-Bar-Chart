@@ -136,7 +136,7 @@ function drawRectangles(data) {
         .attr("class", "x-axis-label");
 
     // include one rectangle for each data point
-    containerSVG
+    const rectangles = containerSVG
         // select all elements
         .selectAll("rect")
         // include data and however many rectangles are required by the json object
@@ -148,6 +148,21 @@ function drawRectangles(data) {
         .attr("class", "bar")
         .attr("data-date", (d) => d[0])
         .attr("data-gdp", (d) => d[1])
+        // TODO comment how to include a tooltip (see also the div included below)
+        .on("mouseover", (d) => {
+            tooltip
+                .style("opacity", 1)
+                .style("left", `${d3.event.layerX - 100}px`)
+                .style("top", `${d3.event.layerY - 200}px`)
+                .text(() => {
+                    let textYear = d[0].substring(0,4);
+                    let textGdp = d[1];
+                    return `${textYear} GDP: ${textGdp}`;
+                });
+        })
+        .on("mouseleave", () => {
+            tooltip.style("opacity", 0);
+        })
         // position the different rectangles in the space given by the width of the SVG
         // width to which you deduct the offset given by the vertical axis (you start x pixels after the 0 coordinate, you end x pixels before)
         .attr("x", (d, i) => offset + (w-offset)/ data.length * i)
@@ -167,4 +182,12 @@ function drawRectangles(data) {
         // compounded with the y coordinate, this allows to draw the rectangles from the top left corner to the bottom right corner
         // deduct the measure by offset, as this is included in the yScale for the y-axis
         .attr("height", (d) => (h - yScale(d[1])) - offset);
+    
+    
+
+    // to include a tooltip, append to the body a div, with the selected text
+    const tooltip = container
+        .append("div")
+        .attr("class", "tooltip")
+        .text("hello");
 }
