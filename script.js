@@ -148,18 +148,27 @@ function drawRectangles(data) {
         .attr("class", "bar")
         .attr("data-date", (d) => d[0])
         .attr("data-gdp", (d) => d[1])
-        // TODO comment how to include a tooltip (see also the div included below)
+        // include two listeners for the mouseover and mouseleave events
+        // as the cursor overs on a rectangle element, transition the tooltip into view, with the text describing the rectangle element
+        // as the cursor leaves, transition the tooltip out of sight
+        // tooltip is defined to store a reference to a div
+        // important: the event listener accepts as argument the data being processed (d), which is then used in the text of the tooltip
         .on("mouseover", (d) => {
             tooltip
+                // alter the opacity to make the tooltip visible
                 .style("opacity", 1)
+                // position the tooltip close to the cursor, using the d3.event object
+                // console.log() this object to establish which properties are needed
                 .style("left", `${d3.event.layerX - 100}px`)
-                .style("top", `${d3.event.layerY - 200}px`)
+                .style("top", `${d3.event.layerY - 150}px`)
                 .text(() => {
+                    // display with text the year and the respective value in terms of GDP
                     let textYear = d[0].substring(0,4);
                     let textGdp = d[1];
                     return `${textYear} GDP: ${textGdp}`;
                 });
         })
+        // on mouseleave change the opacity back to 0
         .on("mouseleave", () => {
             tooltip.style("opacity", 0);
         })
@@ -184,10 +193,9 @@ function drawRectangles(data) {
         .attr("height", (d) => (h - yScale(d[1])) - offset);
     
     
-
-    // to include a tooltip, append to the body a div, with the selected text
+    // to include a tooltip, append to the body a div
+    // this is styled in CSS and altered in JS following the event listeners attached to the rectangle elements
     const tooltip = container
         .append("div")
-        .attr("class", "tooltip")
-        .text("hello");
+        .attr("id", "tooltip");
 }
