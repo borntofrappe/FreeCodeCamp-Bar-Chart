@@ -29,13 +29,25 @@ If that sounds long and at times confusing, the [live example](https://codepen.i
 
 # Design Choices
 
-Much alike the pen proposed as an example by freeCodeCamp, the chart, alongside its title, it planned to be displayed on a card. As far as fonts are concerned, I chose 'Montserrat', both for the headers and the text eventually displayed as a tooltip. For the background, card and bar colors, I experimented with several choices, but ultimately opted for a single-hue palette.
+Much alike the pen proposed as an example by freeCodeCamp, the chart, alongside its title, it planned to be displayed in a card which frames the content. As far as fonts are concerned, I chose 'Encode Sans Semi Expanded', both for the headers and the text eventually displayed in a tooltip. For the background, card and bar colors, I experimented with several choices, but ultimately opted for a palette based on a single hue.
 
 Indeed for the theme of the project I chose a tepid red #D75753, with darker variations for the header and the rectangles drawn with SVG elements. For the card on which the data is visualized, I chose a simple white, #f5f5f5.
 
-In the end the red was substituted by a nice purple. The simple design seems to look nice almost with every color choices. 
+In the end the red was substituted with a nice purple. The simple design seems to look nice almost with every color and the variables created through stylus allow for quick experimentation by changing very a  couple of lines of code. 
 
-Beside these simple design-decisions, the majority of the time and attention was spent (and is currently in the process of being spent) on the JavaScript file.
+```code
+background = #3F2159
+card = #f5f5f5
+theme = darken(background, 30%)
+```
 
-//TODO I still have to refactor the project to easily draw precise coordinates and include 
+Including a theme color based on the background choice, it is possible to alter one hue and have it cascade throughout the stylesheet to affect the entire page.
+
+Beside these simple design decisions, the majority of the time and attention was spent (and is currently in the process of being spent) on the JavaScript file.
+
+Update: after struggling a while with the exact coordinates of the chart and the different components here displayed, I decided to refactor my JS file to clear the structure of the code. And most importantly, to avoid including hard-coded code, or instructions tailored, specific to the single case.
+
+I personally struggle with the coordinate system of the SVG, especially when some padding is included to make space for the vertical and horizontal axes. It is essential to factor this padding in the SVG system and the axes alike, as to provide a chart which indeed locates the different data points in their respective, correct position in the _x_ and _y_ coordinates. 
+
+//TODO include a tooltip whenever the cursor hovers on the rectangles
 

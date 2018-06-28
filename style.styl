@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css?family=Montserrat');
+@import url('https://fonts.googleapis.com/css?family=Encode+Sans+Semi+Expanded')
 
 // include design choices in terms of font and colors
-font = 'Montserrat', sans-serif
+font = 'Encode Sans Semi Expanded', sans-serif
 // the page uses a single color palette, with darker variations for text and the bars of the bar chart
 // swapping the background value here defined will allow for different visuals
 background = #3F2159
@@ -21,7 +21,7 @@ body
     color theme
     background background
     
-#card
+.container
     // limit the width of the svg 
     max-width 900px
     // separate the card from the vertical edges of the page
@@ -40,9 +40,10 @@ body
             &:hover
                 fill darken(theme, 70%)
         
-    #title 
+    h1#title 
         // style the title to be boldly displayed atop the chart
         font-size 3rem
+        font-weight 500
         text-transform capitalize
         text-align center
         // include a simple animation which introduces the title from the top of the screen, right before the card has finised animating 
@@ -72,5 +73,5 @@ body
 
 // on scmaller screen sizes, reduce the font-size of the header
 @media (max-width: 700px) 
-    #card #title
+    .container h1#title
         font-size 2rem
