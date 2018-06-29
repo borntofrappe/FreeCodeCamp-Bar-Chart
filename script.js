@@ -9,24 +9,20 @@ container
         .text("Gross Domestic Product")
         .attr("id", "title");
 
-// define values used in the viewbox attribute to specify the width and height of the graphic
+// define the values used in the viewbox attribute to specify the width and height of the graphic
 // these allow to include the width and height of the rectangle on the basis of just the width and height of the svg
 // later, these also allow to match the translation of the y-axis and x-axis (translation necessary to avoid any cropping of the axes' ticks)
 
-const margin = {
-    top: 20, 
-    right: 20,
-    bottom: 20,
-    left: 45
-};
-const w = 1000 - (margin.left + margin.right);
-const h = 600- (margin.top + margin.bottom);
+const margin = 45;
+
+const w = 1000 - (margin*2);
+const h = 600- (margin*2);
 
 // append an svg and store a reference to it, to later include rect elements
 const containerSVG = container
                             .append("svg")
                             // by specifying only the viewbox, it is possible to alter the width in CSS and maintain the ratio, making the graphic responsive (by including responsive units of measure, like vh, vw, em, rem)
-                            .attr("viewBox", `0 0 ${w + margin.left + margin.right} ${h + margin.top + margin.bottom}`);
+                            .attr("viewBox", `0 0 ${w + margin * 2} ${h + margin * 2}`);
 
 
 /* XMLHTTp Request */
@@ -46,7 +42,7 @@ const yScale = d3
 
 // for the x-axis, include a scale which maps the input horizontally, in a space defined by the width
 const xScale = d3
-                .scalePoint()
+                .scaleLinear()
                 .range([0,w]);
 
 
@@ -92,7 +88,7 @@ function drawRectangles(data) {
         .domain([0, d3.max(data, (d) => d[1])]);
 
     // create a vertical axis on the basis of the vertical scale
-    //  with ticks matching the value of the GPD data
+    // with ticks matching the value of the GPD data
     const yAxis = d3
                     .axisLeft(yScale);
 
@@ -100,13 +96,13 @@ function drawRectangles(data) {
     containerSVG
         .append("g")
         .attr("id", "y-axis")
-        .attr("transform", `translate(0, ${margin.top})`)
+        .attr("transform", `translate(0, ${margin})`)
         // include a transition to move the axis into the SVG canvas
         .transition()
         .duration(1000)
         .delay(4000)
-        // offset the vertical axis to visualize the ticks
-        .attr("transform", `translate(${margin.left}, ${margin.top})`)
+        // translate the vertical axis to visualize the ticks
+        .attr("transform", `translate(${margin}, ${margin})`)
         .call(yAxis);
 
 
@@ -115,33 +111,27 @@ function drawRectangles(data) {
     const years = [];
     // increment by 4 to skip one year at each iteration (there are four quarters, with four measurements bearing the same year)
     for(let i = 0; i < data.length; i+=4) {
-        years.push(data[i][0]);
+        // substring(0,4) to target the first four digits, giving the year
+        years.push(data[i][0].substring(0,4));
     }
-    // scalePoint allows to include a tick for each item of the array which is included in the domain function, in the space described by the range function
     xScale
-        .domain(years);
+        .domain([d3.min(years), d3.max(years)]);
 
     // create an horizontal axis on the basis of the horizontal scale
     // include the axis through a group element, much alike the vertical counterpart
     const xAxis = d3
                     .axisBottom(xScale);
-    // modify the format of the ticks, as to display only every five year starting from 1950 (1950,1955...)
-    xAxis.tickFormat((tick) => {
-        // include the year for the prescribed dates, otherwise include empty text 
-        let year = tick.substring(0,4);
-        return (year % 5 == 0) ? year : ""; 
-    });
 
     containerSVG
         .append("g")
         .attr("id", "x-axis")
         // position the axis at the bottom of the chart
-        .attr("transform", `translate(${margin.left}, ${h + margin.top + margin.bottom})`)
+        .attr("transform", `translate(${margin}, ${h + margin*2})`)
         .transition()
         .duration(1000)
         .delay(4000)
-        // move the axis to its rightful position, translated horizontally by margin.left, translated vertically by margin.bottom (included to show the ticks of the axis itself (as these would be cropped out of the SVG canvas, being drawn below the axis))
-        .attr("transform", `translate(${margin.left}, ${h + margin.bottom})`)
+        // move the axis to its rightful position, translated horizontally by margin, translated vertically by margin as well (included to show the ticks of the axis itself, as these would be cropped out of the SVG canvas, being drawn below the axis)
+        .attr("transform", `translate(${margin}, ${h + margin})`)
         .call(xAxis);
 
     // include one rectangle for each data point
@@ -189,14 +179,14 @@ function drawRectangles(data) {
         })
         // position the different rectangles in the space given by the width of the SVG
         // translate each rectangle by the measure specified by margin left (to also match the y-axis)
-        .attr("x", (d, i) => margin.left + w/ data.length * i)
+        .attr("x", (d, i) => (w / data.length * i) + margin)
         // position the rectangles in the space allowed by the height of the SVG
         // SVG elements are drawn from the top down, with increasing y values movign the elements downward
         // the vertical scale already accounts for this behavior
         // translate each rectangle by the measure specified by margin top (to also match the x-axis)
-        .attr("y", (d) => yScale(d[1]) + margin.top)
+        .attr("y", (d) => yScale(d[1]) + margin)
         // include a default width, equal to the width of the SVG divided by the number of items in the array
-        .attr("width", w/data.length)
+        .attr("width", w / data.length)
         // animate the height values, to reach the measure defined by the GDP value
         .transition()
         .duration(500)
