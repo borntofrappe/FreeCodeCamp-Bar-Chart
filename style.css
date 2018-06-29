@@ -26,9 +26,6 @@ body {
 .container svg .bar:hover {
   fill: #382202;
 }
-.container svg .x-axis-label {
-  transform: translateY(20px) translateX(-20px) rotate(-90deg);
-}
 .container h1#title {
   font-size: 3rem;
   font-weight: 500;

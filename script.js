@@ -1,28 +1,58 @@
+/** SETUP */
+
 // select the container in which D3.JS will plot the bar chart
 const container = d3.select(".container");
 
 // append a header with id="title", describing the bar chart which follows
 container
-    .append("h1")
-    .text("Gross Domestic Product")
-    .attr("id", "title");
+        .append("h1")
+        .text("Gross Domestic Product")
+        .attr("id", "title");
 
-// define values used in the viewbox attriute to specify the width and height of the graphic
-const w = 1000;
-const h = 600;
+// define values used in the viewbox attribute to specify the width and height of the graphic
+// these allow to include the width and height of the rectangle on the basis of just the width and height of the svg
+// later, these also allow to match the translation of the y-axis and x-axis (translation necessary to avoid any cropping of the axes' ticks)
+
+const margin = {
+    top: 20, 
+    right: 20,
+    bottom: 20,
+    left: 45
+};
+const w = 1000 - (margin.left + margin.right);
+const h = 600- (margin.top + margin.bottom);
+
 // append an svg and store a reference to it, to later include rect elements
 const containerSVG = container
-                .append("svg")
-                // by specifying only the viewbox, it is possible to alter the width in CSS and maintain the ratio, making the graphic responsive (by including responsive units of measure, like vh, vw, em, rem)
-                .attr("viewBox", `0 0 ${w} ${h}`);
+                            .append("svg")
+                            // by specifying only the viewbox, it is possible to alter the width in CSS and maintain the ratio, making the graphic responsive (by including responsive units of measure, like vh, vw, em, rem)
+                            .attr("viewBox", `0 0 ${w + margin.left + margin.right} ${h + margin.top + margin.bottom}`);
 
+
+/* XMLHTTp Request */
 
 // once the space occupied by the SVG is accommodated in the page, create a request to retrieve the data from the provided url
 const URL = "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json";
 
+// create the scales which will be used to include data in the x and y axis
+// add the range for both scale
+// range being the area in which the input is mapped out
+
+// for the y-axis, include a scale which maps the input vertically
+// as the y coordinate is drawn top to bottom, with increasing values moving the SVG downward, the range actually goes from h to 0, h being the height of the frame and therefore the bottom of the SVG and 0 being the top of the SVG
+const yScale = d3
+                .scaleLinear()
+                .range([h, 0]);
+
+// for the x-axis, include a scale which maps the input horizontally, in a space defined by the width
+const xScale = d3
+                .scalePoint()
+                .range([0,w]);
+
+
 // create a new instance of the XMLHttpRequest object
 const request = new XMLHttpRequest();
-// initialize a get request at the provided url
+// initialize a get request with the provided url
 request.open("GET", URL, true);
 // send the request
 request.send();
@@ -30,17 +60,19 @@ request.send();
 request.onload = function() {
     let json = JSON.parse(request.responseText);
     // call a function to draw rectangle elements on the basis of the data parsed into a json object
-    // json.data holds 200+ arrays in which information regarding the gross domestic product is included
-    // json.data itself is an array of arrays; the first level represents the different data points, while the nested array represents the actual values, in terms of date and amount of gross domestic product
     drawRectangles(json.data);
 };
+
+
+
+/* drawing function, once the data is retrieved */
 
 // create a function which accepts an array of arrays and draws rectngles on the basis of the values found in each nested array
 function drawRectangles(data) {
     /*
-    - data is an array of array
+    - data is an array of arrays (approximately 275 of them)
 
-        - data[i] holds an array regarding the date and the GDP for said date 
+        - each data[i] array holds an array with information on the GDP measurement, its date and value
 
             - data[i][0] holds the date 
             example: 
@@ -52,64 +84,45 @@ function drawRectangles(data) {
                 15057.7 
    */ 
   
-    // define a variable which is used in order to 1. place the axes inside of the SVG canvas and 1. translate the rectangles to match with the movement included for the axis
-    // for instance, to visualize the y axis positioned to the left of the chart, you need to translate it vertically to the right
-    // as this would place the axis on top of the data, the approach is to increase tha padding of the data visualization
-    const offset = 45;
-
 
     /* scales and axes */
 
-   // create a scale used for the y axis
-   // domain: from 0 up to the greatest value of GDP
-   // range: from the offset measure to the height of the SVG, deducted by the offset
-   // as the y coordinate is drawn top to bottom, with increasing values moving the SVG downward, the range is actually swapped to go from 0 at the bottom of the SVG to max at the top (bottom and top "padded" as mentioned)
-   
-    const yScale = d3
-                    .scaleLinear()
-                    .domain([0, d3.max(data, (d) => d[1])])
-                    // 0 = h - offset, meaning the rectangle starts from the bottom of the SVG canvas; offset from the bottom by the offset amount to display the first tick (this requires an equal offset on the y coordinate of the rectangles, to let them start at 0)
-                    // max = offset
-                    .range([h - offset, offset]);
+   // define the domain of the vertical scale, on the basis of the obtained data
+    yScale
+        .domain([0, d3.max(data, (d) => d[1])]);
 
-    // create a vertical axis with ticks matching the value of the GPD data
+    // create a vertical axis on the basis of the vertical scale
+    //  with ticks matching the value of the GPD data
     const yAxis = d3
                     .axisLeft(yScale);
 
+    // include a group element in which to include the y axis
     containerSVG
-        // include a group element in which to include the y axis
         .append("g")
         .attr("id", "y-axis")
-        // include a transition to move the axis into the SVG canvas (from the default position where it is cropped from the canvas itself)
+        .attr("transform", `translate(0, ${margin.top})`)
+        // include a transition to move the axis into the SVG canvas
         .transition()
         .duration(1000)
         .delay(4000)
         // offset the vertical axis to visualize the ticks
-        .attr("transform", `translate(${offset}, 0)`)
+        .attr("transform", `translate(${margin.left}, ${margin.top})`)
         .call(yAxis);
 
 
-    // create a scale used for the x axis
-    // the x-axis ought to display the years of the GDP data, with labels for 1950, 1955, 1960
-    // the different ticks are to be included in the x axis, from 0 up to the width of the SVG
-    // this is achieved through a different scale, _scalePoint_
-
+    // define the domain of the x-axis (1949 up to 2015)
     // store in an array the years provided in the date value
     const years = [];
-    // increment by 4 to skip one year at each iteration (there are four trimesters, which would repeat the year value)
+    // increment by 4 to skip one year at each iteration (there are four quarters, with four measurements bearing the same year)
     for(let i = 0; i < data.length; i+=4) {
         years.push(data[i][0]);
     }
+    // scalePoint allows to include a tick for each item of the array which is included in the domain function, in the space described by the range function
+    xScale
+        .domain(years);
 
-    // domain: the years from 1949 to 2015
-    // range: the space which is allocated for the years
-    // scalePoint allows to include a tick for each item of the array which is included in the domain function, in the space described by the range function0
-    const xScale = d3
-                    .scalePoint()
-                    .domain(years)
-                    .range([0, w - offset]);
-
-    // create an horizontal axis and include it through a group element, much alike the vertical counterpart
+    // create an horizontal axis on the basis of the horizontal scale
+    // include the axis through a group element, much alike the vertical counterpart
     const xAxis = d3
                     .axisBottom(xScale);
     // modify the format of the ticks, as to display only every five year starting from 1950 (1950,1955...)
@@ -123,17 +136,13 @@ function drawRectangles(data) {
         .append("g")
         .attr("id", "x-axis")
         // position the axis at the bottom of the chart
-        .attr("transform", `translate(${offset}, ${h})`)
+        .attr("transform", `translate(${margin.left}, ${h + margin.top + margin.bottom})`)
         .transition()
         .duration(1000)
         .delay(4000)
-        // move the axis to its rightful position, translated horizontally by the padding added for the y-axis, translated vertically by the same padding, but included to show the ticks of the axis itself (as these would be cropped out of the SVG canvas, being drawn below the axis)
-        .attr("transform", `translate(${offset}, ${h - offset})`)
-        .call(xAxis)
-        // select all text elements of the x-axis (the ticks of the axes include text through a text element)
-        .selectAll("text")
-        // give a class to style the tex of the x-axis (to show the text vertically)
-        .attr("class", "x-axis-label");
+        // move the axis to its rightful position, translated horizontally by margin.left, translated vertically by margin.bottom (included to show the ticks of the axis itself (as these would be cropped out of the SVG canvas, being drawn below the axis))
+        .attr("transform", `translate(${margin.left}, ${h + margin.bottom})`)
+        .call(xAxis);
 
     // include one rectangle for each data point
     containerSVG
@@ -163,7 +172,7 @@ function drawRectangles(data) {
                 // position the tooltip close to the cursor, using the d3.event object
                 // console.log() this object to establish which properties are needed
                 .style("left", `${d3.event.layerX - 100}px`)
-                .style("top", `${d3.event.layerY - 150}px`)
+                .style("top", `${d3.event.layerY - 200}px`)
                 .text(() => {
                     // display with text the year and the respective value in terms of GDP
                     let textDate = d[0];
@@ -179,15 +188,15 @@ function drawRectangles(data) {
             tooltip.style("opacity", 0);
         })
         // position the different rectangles in the space given by the width of the SVG
-        // width to which you deduct the offset given by the vertical axis (you start x pixels after the 0 coordinate, you end x pixels before)
-        .attr("x", (d, i) => offset + (w-offset)/ data.length * i)
+        // translate each rectangle by the measure specified by margin left (to also match the y-axis)
+        .attr("x", (d, i) => margin.left + w/ data.length * i)
         // position the rectangles in the space allowed by the height of the SVG
         // SVG elements are drawn from the top down, with increasing y values movign the elements downward
         // the vertical scale already accounts for this behavior
-        .attr("y", (d) => yScale(d[1]))
+        // translate each rectangle by the measure specified by margin top (to also match the x-axis)
+        .attr("y", (d) => yScale(d[1]) + margin.top)
         // include a default width, equal to the width of the SVG divided by the number of items in the array
-        // width deducted by the padding included for the x-axis
-        .attr("width", (w - offset)/data.length)
+        .attr("width", w/data.length)
         // animate the height values, to reach the measure defined by the GDP value
         .transition()
         .duration(500)
@@ -196,7 +205,7 @@ function drawRectangles(data) {
         // include the height as the difference between the height and the GDP value, processed through the defined scale
         // compounded with the y coordinate, this allows to draw the rectangles from the top left corner to the bottom right corner
         // deduct the measure by offset, as this is included in the yScale for the y-axis
-        .attr("height", (d) => (h - yScale(d[1])) - offset);
+        .attr("height", (d) => (h - yScale(d[1])));
     
     
     // to include a tooltip, append to the body a div

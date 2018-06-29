@@ -49,5 +49,5 @@ Update: after struggling a while with the exact coordinates of the chart and the
 
 I personally struggle with the coordinate system of the SVG, especially when some padding is included to make space for the vertical and horizontal axes. It is essential to factor this padding in the SVG system and the axes alike, as to provide a chart which indeed locates the different data points in their respective, correct position in the _x_ and _y_ coordinates. 
 
-//TODO include a tooltip whenever the cursor hovers on the rectangles
+//TODO: fix issue with the horizontal axis
 
