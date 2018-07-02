@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Encode+Sans+Semi+Expanded");
+@import url("https://fonts.googleapis.com/css?family=Lato");
 * {
   box-sizing: border-box;
   margin: 0;
@@ -7,144 +7,69 @@
 body {
   min-height: 100vh;
   width: 100%;
-  padding: 0 1rem;
-  font-family: 'Encode Sans Semi Expanded', sans-serif;
-  color: #bb7207;
-  background: #f79f1d;
+  font-family: 'Lato', sans-serif;
+  color: #eee;
+  background: #252525;
 }
+
 .container {
-  max-width: 900px;
-  margin: 2rem auto;
+  /* set the size of the container 
+  as the SVG defines only the viewbox attribute, the width spreads to fit the container's width
+  the height is also defined by the viewbox itself, to preserve the width to height ratio */
+  width: 85vw;
   padding: 1rem;
-  border-radius: 12px;
-  background: #f5f5f5;
-  animation: introduceCard 1s cubic-bezier(0.22, -0.3, 0.68, 1.44) both;
-}
-.container svg .bar {
-  fill: #965b06;
-}
-.container svg .bar:hover {
-  fill: #382202;
+  margin: 2rem auto;
+  color: #252525;
+  background: #eee;
+  box-shadow: 6px 8px 0 #252525, 14px 14px 0 #eee;
+  /* include a simple animation which introduces the card from the bottom of the screen */
+  animation: introduceCard 1s cubic-bezier(.22,-0.3,.68,1.44) both;
+
 }
 .container h1#title {
-  font-size: 3rem;
-  font-weight: 500;
+  font-size: 2.5rem;
   text-transform: capitalize;
   text-align: center;
-  animation: introduceTitle 0.5s 0.8s cubic-bezier(0.22, -0.3, 0.68, 1.44) both;
+  margin: 1rem;
+  /* include a simple animation which introduces the title from the top of the screen, right before the card has finised animating  */
+  animation: introduceTitle 0.5s 0.8s cubic-bezier(.22,-0.3,.68,1.44) both;
+}
+.container h1#title::selection {
+  color: #eee;
+  background: #252525;
+}
+.container svg {
+  animation: introduceTitle 0.4s 0.9s cubic-bezier(.22,-0.3,.68,1.44) both;
+}
+/* change the font for the ticks of the axes */
+.container svg text {
+  font-family: 'Lato', sans-serif;
+  font-weight: bold;
+}
+/* change the opacity of the fill on hover */
+.container svg .bar {
+  fill: rgba(37, 37, 37, 0.7);
+}
+.container svg .bar:hover {
+  fill: rgba(37, 37, 37, 1);
 }
 .container div#tooltip {
-  border-radius: 12px;
-  background: #fff;
+  /* absolute position the div used as tooltip, to change the left and bottom properties as the cursor hovers on the SVG rectangles */
+  position: absolute;
+  border-radius: 4px;
+  color: #eee;
+  background: #252525;
   padding: 1rem 2rem;
   font-size: 1.5rem;
   font-weight: bold;
-  filter: drop-shadow(0 2px 5px #f79f1d);
-  position: absolute;
-  z-index: 10;
+  /* pointer events to avoid hovering on the tooltip and preventing the hover state on the rectangle elements behind it */
+  pointer-events: none;
+  /* set opacity to 0 and change it to 1 on hover on the rectangle elements */
   opacity: 0;
-  visibillity: hidden;
-  transition: all 0.2s ease-out;
+  /* transition to smoothen the change in opacity  */
+  transition: opacity 0.2s ease-out;
 }
-@media (max-width: 700px) {
-  .container h1#title {
-    font-size: 2rem;
-  }
-  .container div#tooltip {
-    font-size: 1rem;
-  }
-}
-@-moz-keyframes introduceTitle {
-  0% {
-    transform: translateY(-20vh);
-    opacity: 0;
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-@-webkit-keyframes introduceTitle {
-  0% {
-    transform: translateY(-20vh);
-    opacity: 0;
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-@-o-keyframes introduceTitle {
-  0% {
-    transform: translateY(-20vh);
-    opacity: 0;
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-@keyframes introduceTitle {
-  0% {
-    transform: translateY(-20vh);
-    opacity: 0;
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-@-moz-keyframes introduceCard {
-  0% {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@-webkit-keyframes introduceCard {
-  0% {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@-o-keyframes introduceCard {
-  0% {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* define the animations to introduce the card and the title element */
 @keyframes introduceCard {
   0% {
     transform: translateY(100vh);
@@ -156,5 +81,29 @@ body {
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@keyframes introduceTitle {
+  0% {
+    transform: translateY(-20vh);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* on smaller screen sizes, reduce the font-size of the header and of the tooltip */
+@media (max-width: 700px) {
+  .container h1#title {
+    font-size: 1.8rem;
+  }
+  .container div#tooltip {
+    font-size: 1rem;
   }
 }

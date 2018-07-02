@@ -1,206 +1,183 @@
-/** SETUP */
+/** SETUP
+ * select the element in which to plot the data visualization
+ * include a title through a header element 
+ * include the frame of an SVG canvas, in which to draw the data as it is queried
+ * define the scales for the horizontal and vertical axes
+ * define the range for both axes. These rely on the width and height values of the SVG and can be set prior to retrieving the data
+ */
 
-// select the container in which D3.JS will plot the bar chart
+// SELECT 
 const container = d3.select(".container");
 
-// append a header with id="title", describing the bar chart which follows
+// TITLE 
 container
-        .append("h1")
-        .text("Gross Domestic Product")
-        .attr("id", "title");
+    .append("h1")
+    .attr("id", "title")
+    .text("gross domestic product");
 
-// define the values used in the viewbox attribute to specify the width and height of the graphic
-// these allow to include the width and height of the rectangle on the basis of just the width and height of the svg
-// later, these also allow to match the translation of the y-axis and x-axis (translation necessary to avoid any cropping of the axes' ticks)
+// FRAME
+// define a measure for the margin, included to frame the contents of the SVG inside of the SVG canvas itself by an arbitrary amount
+// this to avoid any cropping, especially for the axes
+const margin = {
+    top: 20,
+    right: 20,
+    bottom: 20,
+    // include a larger margin to the left as to show the values of GDP on the vertical axis
+    left: 50
+}
 
-const margin = 45;
+// define width and height measure deducting arbitrary values of the respective margins
+// this allows to later reference the width and height values and have them refer to the area inside of the SVG canvas, where the elements are not cropped out
+const width = 800 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
 
-const w = 1000 - (margin*2);
-const h = 600- (margin*2);
+// include an SVG with a viewbox attribute dictating the width to height ratio
+// the width is included in the stylesheet and the height is included by proxy through the ratio defined by the viewbox
+const containerCanvas = container
+                                .append("svg")
+                                // by adding the respective margins, the SVG canvas assumes the dimensions defined by the arbitrary values (800, 400)
+                                // anything using the width and height values will be drawn inside of the canvas (you need to first position everything inside of the frame by a measure equal to the margin, and this is achieved with a group elemnt) 
+                                .attr("viewBox", `0 0 ${width + margin.left + margin.right}  ${height + margin.top + margin.bottom}`);
 
-// append an svg and store a reference to it, to later include rect elements
-const containerSVG = container
-                            .append("svg")
-                            // by specifying only the viewbox, it is possible to alter the width in CSS and maintain the ratio, making the graphic responsive (by including responsive units of measure, like vh, vw, em, rem)
-                            .attr("viewBox", `0 0 ${w + margin * 2} ${h + margin * 2}`);
+// include a group element in which to position the SVG elements 
+// by translating the group element by the measure defined by the margin, it is possible to have the SVG elements positioned inside the frame 
+const canvasContents = containerCanvas
+                                .append("g")
+                                .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+// SCALES
+// for the horizontal scale include a time scale
+// for the range (where the data will be displayed as output), include values from 0 up to the width
+const xScale = d3
+                .scaleTime()
+                .range([0, width]);
 
-/* XMLHTTp Request */
-
-// once the space occupied by the SVG is accommodated in the page, create a request to retrieve the data from the provided url
-const URL = "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json";
-
-// create the scales which will be used to include data in the x and y axis
-// add the range for both scale
-// range being the area in which the input is mapped out
-
-// for the y-axis, include a scale which maps the input vertically
-// as the y coordinate is drawn top to bottom, with increasing values moving the SVG downward, the range actually goes from h to 0, h being the height of the frame and therefore the bottom of the SVG and 0 being the top of the SVG
+// for the vartical scale include a linear scale
+// since elements are drawn from the top down though, the range is reversed, with the smallest value being at the bottom of the SVG canvas and the highest value at the top
 const yScale = d3
                 .scaleLinear()
-                .range([h, 0]);
+                .range([height, 0]);
 
-// for the x-axis, include a scale which maps the input horizontally, in a space defined by the width
-const xScale = d3
-                .scaleLinear()
-                .range([0,w]);
+// define a parse function to properly format the data passed in the array 
+// this is present in the following format: 1990-10-01
+const parseTime = d3.timeParse("%Y-%m-%d");
 
 
-// create a new instance of the XMLHttpRequest object
+
+/** DATA
+ * create an instance of an XMLHttpRequest object, to retrieve the data at the provided URL
+ * upon receiving the data, call set the domain of the scale and create the connected axes
+ * plot the chart by including rectangle elements in the SVG in the established area
+ * include a tooltip through a div (the tooltip should appear on the basis of the mouseenter and mouseout events, on the rectangle elements)
+ */
+// XMLHTTPREQUEST
+const URL = "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json";
+
 const request = new XMLHttpRequest();
-// initialize a get request with the provided url
 request.open("GET", URL, true);
-// send the request
 request.send();
-// when the request is fulfilled, start drawing the rectangles in the SVG, on the basis of the retrieved data
+// on load call a function to draw the bar chart 
+// pass as argument the array containing 250+ data arrays
 request.onload = function() {
     let json = JSON.parse(request.responseText);
-    // call a function to draw rectangle elements on the basis of the data parsed into a json object
-    drawRectangles(json.data);
-};
+    drawBarChart(json.data);
+}
 
+// call a function which draws the data visualization based on the data array
+function drawBarChart(data) {
+    /**
+     * data is an array containing 275+ arrays 
+     * each data[i] array nests a two dimensional array
+     * d[i][0] contains information regarding the date of the GDP measurement
+     * d[i][1] contains information regarding the value of the GDP
+     */
 
+    // FORMAT DATA
+    // format the data to have the proper structure, for the time scale and for the linear scale 
+    data.forEach((d) => {
+        d[0] = parseTime(d[0]);
+        d[1] = +d[1];
+    });
 
-/* drawing function, once the data is retrieved */
-
-// create a function which accepts an array of arrays and draws rectngles on the basis of the values found in each nested array
-function drawRectangles(data) {
-    /*
-    - data is an array of arrays (approximately 275 of them)
-
-        - each data[i] array holds an array with information on the GDP measurement, its date and value
-
-            - data[i][0] holds the date 
-            example: 
-                2010-01-01
-                2010-04-01
-
-            - data[i][1] holds the value
-            example: 
-                15057.7 
-   */ 
-  
-
-    /* scales and axes */
-
-   // define the domain of the vertical scale, on the basis of the obtained data
+    // DOMAIN
+    // the scales' domains are defined by the minimum and maximum values of each column
+    xScale
+        // d3.extent returns the minimum and maximum value
+        // this is equivalent to 
+        // .domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]);
+        .domain(d3.extent(data, d => d[0]));
+        
     yScale
-        .domain([0, d3.max(data, (d) => d[1])]);
+        .domain(d3.extent(data, d => d[1]));
 
-    // create a vertical axis on the basis of the vertical scale
-    // with ticks matching the value of the GPD data
+    // AXES 
+    // initialize the axes based on the scales
+    const xAxis = d3
+                    .axisBottom(xScale);
     const yAxis = d3
                     .axisLeft(yScale);
 
-    // include a group element in which to include the y axis
-    containerSVG
-        .append("g")
-        .attr("id", "y-axis")
-        .attr("transform", `translate(0, ${margin})`)
-        // include a transition to move the axis into the SVG canvas
-        .transition()
-        .duration(1000)
-        .delay(4000)
-        // translate the vertical axis to visualize the ticks
-        .attr("transform", `translate(${margin}, ${margin})`)
-        .call(yAxis);
+    // include the axes within group elements
+    canvasContents
+                .append("g")
+                .attr("id", "x-axis")
+                // for the horizontal axis, position it at the bottom of the area defined by the SVG canvas
+                .attr("transform", `translate(0, ${height})`)
+                .call(xAxis);
 
+    canvasContents
+                .append("g")
+                .attr("id", "y-axis")
+                .call(yAxis);
 
-    // define the domain of the x-axis (1949 up to 2015)
-    // store in an array the years provided in the date value
-    const years = [];
-    // increment by 4 to skip one year at each iteration (there are four quarters, with four measurements bearing the same year)
-    for(let i = 0; i < data.length; i+=4) {
-        // substring(0,4) to target the first four digits, giving the year
-        years.push(data[i][0].substring(0,4));
-    }
-    xScale
-        .domain([d3.min(years), d3.max(years)]);
-
-    // create an horizontal axis on the basis of the horizontal scale
-    // include the axis through a group element, much alike the vertical counterpart
-    const xAxis = d3
-                    .axisBottom(xScale);
-
-    containerSVG
-        .append("g")
-        .attr("id", "x-axis")
-        // position the axis at the bottom of the chart
-        .attr("transform", `translate(${margin}, ${h + margin*2})`)
-        .transition()
-        .duration(1000)
-        .delay(4000)
-        // move the axis to its rightful position, translated horizontally by margin, translated vertically by margin as well (included to show the ticks of the axis itself, as these would be cropped out of the SVG canvas, being drawn below the axis)
-        .attr("transform", `translate(${margin}, ${h + margin})`)
-        .call(xAxis);
-
-    // include one rectangle for each data point
-    containerSVG
-        // select all elements
-        .selectAll("rect")
-        // include data and however many rectangles are required by the json object
-        .data(data)
-        .enter()
-        // draw a rectangle for each data point
-        .append("rect")
-        // give a class of bar to each rectangle, and an attribute based on the data it represents
-        .attr("class", "bar")
-        .attr("data-date", (d) => d[0])
-        .attr("data-gdp", (d) => d[1])
-        // include two listeners for the mouseenter and mouseout events
-        // as the cursor overs on a rectangle element, transition the tooltip into view, with the text describing the rectangle element
-        // as the cursor leaves, transition the tooltip out of sight
-        // tooltip is defined to store a reference to a div
-        // important: the event listener accepts as argument the data being processed (d), which is then used in the text of the tooltip
-        .on("mouseenter", (d) => {
-            tooltip
-                // add a data-date attribute remarking the date value which id displayed on the tooltip
-                .attr("data-date", d[0])
-                // alter the opacity to make the tooltip visible
-                .style("opacity", 1)
-                .style("visibility", "visible")
-                // position the tooltip close to the cursor, using the d3.event object
-                // console.log() this object to establish which properties are needed
-                .style("left", `${d3.event.layerX - 100}px`)
-                .style("top", `${d3.event.layerY - 200}px`)
-                .text(() => {
-                    // display with text the year and the respective value in terms of GDP
-                    let textDate = d[0];
-                    let textYear = textDate.substring(0,4);
-                    let textMonth = textDate.substring(5,7);
-                    let textTrimester = (textMonth == "01") ? "Q1" : (textMonth == "04") ? "Q2" : (textMonth == "07") ? "Q3" : "Q4";
-                    let textGdp = d[1];
-                    return `${textYear} ${textTrimester} GDP: $${textGdp}`;
-                });
-        })
-        // on mouseleave change the opacity back to 0
-        .on("mouseout", () => {
-            tooltip.style("opacity", 0);
-        })
-        // position the different rectangles in the space given by the width of the SVG
-        // translate each rectangle by the measure specified by margin left (to also match the y-axis)
-        .attr("x", (d, i) => (w / data.length * i) + margin)
-        // position the rectangles in the space allowed by the height of the SVG
-        // SVG elements are drawn from the top down, with increasing y values movign the elements downward
-        // the vertical scale already accounts for this behavior
-        // translate each rectangle by the measure specified by margin top (to also match the x-axis)
-        .attr("y", (d) => yScale(d[1]) + margin)
-        // include a default width, equal to the width of the SVG divided by the number of items in the array
-        .attr("width", w / data.length)
-        // animate the height values, to reach the measure defined by the GDP value
-        .transition()
-        .duration(500)
-        // give a delay of 1.3s, which follows the animation of the container and title of the page
-        .delay((d, i) => 1300 + i * 5)
-        // include the height as the difference between the height and the GDP value, processed through the defined scale
-        // compounded with the y coordinate, this allows to draw the rectangles from the top left corner to the bottom right corner
-        // deduct the measure by offset, as this is included in the yScale for the y-axis
-        .attr("height", (d) => (h - yScale(d[1])));
-    
-    
-    // to include a tooltip, append to the body a div
-    // this is styled in CSS and altered in JS following the event listeners attached to the rectangle elements
+    // TOOLTIP
+    // include a tooltip through a div element
     const tooltip = container
-        .append("div")
-        .attr("id", "tooltip");
+                        .append("div")
+                        .attr("id", "tooltip");
+
+    // PLOT CHART
+    // include as many rectangle elements as required by the data array (275 data points)
+    canvasContents
+                .selectAll("rect")
+                .data(data)
+                .enter()
+                .append("rect")
+                // include two listeners for the mouseenter and mouseout events
+                // as the cursor hovers on a rectangle element, transition the tooltip into view, with the text describing the rectangle element
+                // as the cursor leaves, transition the tooltip out of sight
+                // tooltip is defined to store a reference to a div
+                // important: the event listener accepts as argument the data being processed (d), which is then used in the text of the tooltip
+                .on("mouseenter", (d) => {
+                    tooltip 
+                        // alter the opacity to make the tooltip visible
+                        .style("opacity", 1)
+                        // position the tooltip close to the cursor, using the d3.event object
+                        // console.log() this object to establish which properties are needed
+                        .style("left", `${d3.event.layerX - 150}px`)
+                        .style("top", `${d3.event.layerY - 80}px`)
+                        .text(() => {
+                            // d[0], as it is processed through the parse function, represents an instance of the date object
+                            // getFullYear() allows to retrieve the four-digit year 
+                            let year = d[0].getFullYear();
+                            let quarter = (d[0].getMonth() == 0) ? "Q1" : (d[0].getMonth() == 3) ? "Q2" : (d[0].getMonth() == 6) ? "Q3" : "Q4";
+
+                            return `${year} ${quarter} ${d[1]}`;
+                        });
+                })
+                .on("mouseout", () => {
+                    tooltip
+                        .style("opacity", 0);
+                })
+                .attr("data-date", (d) => d[0])
+                .attr("data-gdp", (d) => d[1])
+                // position the rectangle elements with increasing horizontal coordinate, each after the previous rectangle
+                .attr("x", (d, i) => (width/ data.length) * i)
+                // give a width equal to the width of the SVG canvas, divided by the number of data points present (this allows each rectangle to take a fraction of the available width)
+                .attr("width", (width/ data.length))
+                // position the top left corner of the rectangle elements to the value assumed by the data point, passed in the scale function
+                .attr("y", (d) => yScale(d[1]))
+                // give a height equal to the height of the SVG canvas, deducted by the y coordinate assumed by the data point (this roundabout approach is included since SVG elements are drawn top down)
+                .attr("height", (d) => height - yScale(d[1]))
+                .attr("class", "bar");
 }
