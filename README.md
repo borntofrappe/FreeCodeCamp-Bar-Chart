@@ -18,12 +18,12 @@ Additionally, there exist a series of user-stories which must be satisfied for t
 1. [x] the chart should have two _g_ elements used to describe the horizontal and vertical axes. These should have _id="x-axis"_ and _id="y-axis"_ respectively. 
 1. [x] both axes should contain multiple labels, with _class="tick"_
 1. [x] the chart should have a _rect_ element for each data point and with _class="bar"_ 
-1. [x] each bar should contain properties _data-date_ and _data-gdp_, describing the date and GDP value of each rectangle. These should match the provided data. 
+1. [ ] each bar should contain properties _data-date_ and _data-gdp_, describing the date and GDP value of each rectangle. These should match the provided data. 
 1. [x] the rectangles' height should visually remark the amount described by the data.
 1. [ ] the _data-date_ attributes and corresponding bars should be aligned with the x-axis
 1. [x] the _data-gpd_ attributes and the connected bars should be aligned with the y-axis
 1. [x] on hover a tooltip with _id="tooltip"_ should be displayed with additional information
-1. [x] the tooltip should also detail the data in the aforementioned attributes of data-date.
+1. [ ] the tooltip should also detail the data in the aforementioned attribute of data-date.
 
 If that sounds long and at times confusing, the [live example](https://codepen.io/freeCodeCamp/full/GrZVaM) visually shows how the project should ultimately look and feel.
 
@@ -49,5 +49,13 @@ Update: after struggling a while with the exact coordinates of the chart and the
 
 I personally struggle with the coordinate system of the SVG, especially when some padding is included to make space for the vertical and horizontal axes. It is essential to factor this padding in the SVG system and the axes alike, as to provide a chart which indeed locates the different data points in their respective, correct position in the _x_ and _y_ coordinates. 
 
-//TODO: fix issue with the horizontal axis
+# Update
+
+Following a couple of days worth of research, I refactored the code to include more understandable syntax. The spacing is handled in a much cleaner way, without specific padding or margin values thrown left and right. 
+
+With the new update however, it's not all peach-y. While the project is fully completing its task of visualizing the GDP for the different years, it achieves its goals without fulfilling every user story.
+
+Mostly, the failed tests regard the _data-date_ attribute. This was relatively expected, as in the refactoring of the code base I altered the format of the date retrieved from the XMLHttpRequest. I did so to include a properly formatted date object, so I'd like to keep that change. Now it's a matter of fitting the rest of the code base to this change. This entails including the new format in the data attributes, for both the rectangle elements and the tooltip.
+
+On the plus side, the alignment of the _x_ and _y_ axes is fixed from the previous version.
 
