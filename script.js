@@ -34,16 +34,16 @@ const width = 800 - margin.left - margin.right,
 // include an SVG with a viewbox attribute dictating the width to height ratio
 // the width is included in the stylesheet and the height is included by proxy through the ratio defined by the viewbox
 const containerCanvas = container
-                                .append("svg")
-                                // by adding the respective margins, the SVG canvas assumes the dimensions defined by the arbitrary values (800, 400)
-                                // anything using the width and height values will be drawn inside of the canvas (you need to first position everything inside of the frame by a measure equal to the margin, and this is achieved with a group elemnt) 
-                                .attr("viewBox", `0 0 ${width + margin.left + margin.right}  ${height + margin.top + margin.bottom}`);
+                            .append("svg")
+                            // by adding the respective margins, the SVG canvas assumes the dimensions defined by the arbitrary values (800, 400)
+                            // anything using the width and height values will be drawn inside of the canvas (you need to first position everything inside of the frame by a measure equal to the margin, and this is achieved with a group elemnt) 
+                            .attr("viewBox", `0 0 ${width + margin.left + margin.right}  ${height + margin.top + margin.bottom}`);
 
 // include a group element in which to position the SVG elements 
 // by translating the group element by the measure defined by the margin, it is possible to have the SVG elements positioned inside the frame 
 const canvasContents = containerCanvas
-                                .append("g")
-                                .attr("transform", `translate(${margin.left}, ${margin.top})`);
+                            .append("g")
+                            .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 // SCALES
 // for the horizontal scale include a time scale
@@ -60,7 +60,8 @@ const yScale = d3
 
 // define a parse function to properly format the data passed in the array 
 // this is present in the following format: 1990-10-01
-const parseTime = d3.timeParse("%Y-%m-%d");
+const parseTime = d3
+                    .timeParse("%Y-%m-%d");
 
 
 
@@ -107,9 +108,9 @@ function drawBarChart(data) {
         // .domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]);
         .domain(d3.extent(data, d => d[0]));
         
-    yScale
+        yScale
         .domain(d3.extent(data, d => d[1]));
-
+       
     // AXES 
     // initialize the axes based on the scales
     const xAxis = d3
@@ -119,16 +120,16 @@ function drawBarChart(data) {
 
     // include the axes within group elements
     canvasContents
-                .append("g")
-                .attr("id", "x-axis")
-                // for the horizontal axis, position it at the bottom of the area defined by the SVG canvas
-                .attr("transform", `translate(0, ${height})`)
-                .call(xAxis);
+        .append("g")
+        .attr("id", "x-axis")
+        // for the horizontal axis, position it at the bottom of the area defined by the SVG canvas
+        .attr("transform", `translate(0, ${height})`)
+        .call(xAxis);
 
     canvasContents
-                .append("g")
-                .attr("id", "y-axis")
-                .call(yAxis);
+        .append("g")
+        .attr("id", "y-axis")
+        .call(yAxis);
 
     // TOOLTIP
     // include a tooltip through a div element
@@ -139,45 +140,47 @@ function drawBarChart(data) {
     // PLOT CHART
     // include as many rectangle elements as required by the data array (275 data points)
     canvasContents
-                .selectAll("rect")
-                .data(data)
-                .enter()
-                .append("rect")
-                // include two listeners for the mouseenter and mouseout events
-                // as the cursor hovers on a rectangle element, transition the tooltip into view, with the text describing the rectangle element
-                // as the cursor leaves, transition the tooltip out of sight
-                // tooltip is defined to store a reference to a div
-                // important: the event listener accepts as argument the data being processed (d), which is then used in the text of the tooltip
-                .on("mouseenter", (d) => {
-                    tooltip 
-                        // alter the opacity to make the tooltip visible
-                        .style("opacity", 1)
-                        // position the tooltip close to the cursor, using the d3.event object
-                        // console.log() this object to establish which properties are needed
-                        .style("left", `${d3.event.layerX - 150}px`)
-                        .style("top", `${d3.event.layerY - 80}px`)
-                        .text(() => {
-                            // d[0], as it is processed through the parse function, represents an instance of the date object
-                            // getFullYear() allows to retrieve the four-digit year 
-                            let year = d[0].getFullYear();
-                            let quarter = (d[0].getMonth() == 0) ? "Q1" : (d[0].getMonth() == 3) ? "Q2" : (d[0].getMonth() == 6) ? "Q3" : "Q4";
+        .selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        // include two listeners for the mouseenter and mouseout events
+        // as the cursor hovers on a rectangle element, transition the tooltip into view, with the text describing the rectangle element
+        // as the cursor leaves, transition the tooltip out of sight
+        // tooltip is defined to store a reference to a div
+        // important: the event listener accepts as argument the data being processed (d), which is then used in the text of the tooltip
+        .on("mouseenter", (d) => {
+            tooltip 
+                // alter the opacity to make the tooltip visible
+                .style("opacity", 1)
+                // position the tooltip close to the cursor, using the d3.event object
+                // console.log() this object to establish which properties are needed
+                .style("left", `${d3.event.layerX - 150}px`)
+                .style("top", `${d3.event.layerY - 80}px`)
+                // include a data-date property which describes the date of the connected rectangle element
+                .attr("data-date", d[0])
+                .text(() => {
+                    // d[0], as it is processed through the parse function, represents an instance of the date object
+                    // getFullYear() allows to retrieve the four-digit year 
+                    let year = d[0].getFullYear();
+                    let quarter = (d[0].getMonth() == 0) ? "Q1" : (d[0].getMonth() == 3) ? "Q2" : (d[0].getMonth() == 6) ? "Q3" : "Q4";
 
-                            return `${year} ${quarter} ${d[1]}`;
-                        });
-                })
-                .on("mouseout", () => {
-                    tooltip
-                        .style("opacity", 0);
-                })
-                .attr("data-date", (d) => d[0])
-                .attr("data-gdp", (d) => d[1])
-                // position the rectangle elements with increasing horizontal coordinate, each after the previous rectangle
-                .attr("x", (d, i) => (width/ data.length) * i)
-                // give a width equal to the width of the SVG canvas, divided by the number of data points present (this allows each rectangle to take a fraction of the available width)
-                .attr("width", (width/ data.length))
-                // position the top left corner of the rectangle elements to the value assumed by the data point, passed in the scale function
-                .attr("y", (d) => yScale(d[1]))
-                // give a height equal to the height of the SVG canvas, deducted by the y coordinate assumed by the data point (this roundabout approach is included since SVG elements are drawn top down)
-                .attr("height", (d) => height - yScale(d[1]))
-                .attr("class", "bar");
+                    return `${year} ${quarter} ${d[1]}`;
+                });
+        })
+        .on("mouseout", () => {
+            tooltip
+                .style("opacity", 0);
+        })
+        .attr("data-date", (d) => d[0])
+        .attr("data-gdp", (d) => d[1])
+        // position the rectangle elements with increasing horizontal coordinate, each after the previous rectangle
+        .attr("x", (d, i) => (width/ data.length) * i)
+        // give a width equal to the width of the SVG canvas, divided by the number of data points present (this allows each rectangle to take a fraction of the available width)
+        .attr("width", (width/ data.length))
+        // position the top left corner of the rectangle elements to the value assumed by the data point, passed in the scale function
+        .attr("y", (d) => yScale(d[1]))
+        // give a height equal to the height of the SVG canvas, deducted by the y coordinate assumed by the data point (this roundabout approach is included since SVG elements are drawn top down)
+        .attr("height", (d) => height - yScale(d[1]))
+        .attr("class", "bar");
 }
