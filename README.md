@@ -1,4 +1,4 @@
-Link to the work-in-progress pen right [here](https://codepen.io/borntofrappe/full/mKGZaO/).
+Link to the working pen right [here](https://codepen.io/borntofrappe/full/mKGZaO/).
 
 # Preface 
 
@@ -20,7 +20,7 @@ Additionally, there exist a series of user-stories which must be satisfied for t
 1. [x] the chart should have a _rect_ element for each data point and with _class="bar"_ 
 1. [x] each bar should contain properties _data-date_ and _data-gdp_, describing the date and GDP value of each rectangle. These should match the provided data. 
 1. [x] the rectangles' height should visually remark the amount described by the data.
-1. [ ] the _data-date_ attributes and corresponding bars should be aligned with the x-axis
+1. [x] the _data-date_ attributes and corresponding bars should be aligned with the x-axis
 1. [x] the _data-gpd_ attributes and the connected bars should be aligned with the y-axis
 1. [x] on hover a tooltip with _id="tooltip"_ should be displayed with additional information
 1. [x] the tooltip should also detail the data in the aforementioned attribute of data-date.

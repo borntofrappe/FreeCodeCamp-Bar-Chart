@@ -13,7 +13,7 @@ const container = d3.select(".container");
 container
     .append("h1")
     .attr("id", "title")
-    .text("gross domestic product");
+    .text("Gross Domestic Product 📈");
 
 // FRAME
 // define a measure for the margin, included to frame the contents of the SVG inside of the SVG canvas itself by an arbitrary amount
@@ -36,7 +36,7 @@ const width = 800 - margin.left - margin.right,
 const containerCanvas = container
                             .append("svg")
                             // by adding the respective margins, the SVG canvas assumes the dimensions defined by the arbitrary values (800, 400)
-                            // anything using the width and height values will be drawn inside of the canvas (you need to first position everything inside of the frame by a measure equal to the margin, and this is achieved with a group elemnt) 
+                            // anything using the width and height values will be drawn inside of the canvas (you need to first position everything inside of the frame by a measure equal to the margin, and this is achieved with a group element) 
                             .attr("viewBox", `0 0 ${width + margin.left + margin.right}  ${height + margin.top + margin.bottom}`);
 
 // include a group element in which to position the SVG elements 
