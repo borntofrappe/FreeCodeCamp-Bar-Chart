@@ -64,3 +64,37 @@ yScale
 **Issue #2**
 
 > The bar elements' "data-date" properties should match the order of the provided data
+
+The issue is additionally explained with the following error message:
+
+> AssertionError: Bars should have date data in the same order as the provided data : expected 'Wed Jan 01 1947 00:00:00 GMT+0100 (Central European Standard Time)' to equal '1947-01-01'
+
+Thanks to this last message (which is not clearly displayed in the test suite, there are a few bugs in this feature itself), it is possible to understand from where the issue emerges.
+
+> expected 'Wed Jan 01 1947 00:00:00 GMT+0100 (Central European Standard Time)' to equal '1947-01-01'
+
+When formatting the different years with the parsing function, the date is converted to a date object. 
+
+```JS
+const parseTime = d3
+                    .timeParse("%Y-%m-%d");
+```
+
+The issue is also visible in the developer console, in each `data-date` attribute of each rectangle element, which shows the date object. The attributes are instead expected to hold the original value of the data points, in the format `%Y-%m-%d`. 
+
+ To fix this issue, it is possible to define a formatting function, to the desired format.
+
+```JS
+const formatTime = d3.timeFormat("%Y-%m-%d");
+```
+
+And later pass as argument of this function the date objects.
+
+```JS
+// append rectangles...
+
+// format the date object
+.attr("data-date", (d) => formatTime(d[0]))
+```
+
+The tooltip also includes a reference to the date object. This reference needs to be also formatted to have the tooltip match the respective rectangle element.

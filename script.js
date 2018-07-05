@@ -63,6 +63,10 @@ const yScale = d3
 const parseTime = d3
                     .timeParse("%Y-%m-%d");
 
+// define a formatting function, which formats the date object obtained through the parse function to the original format
+// the date object allows to include the different data points in the time scale
+// the format allows to display the original format, as expected by the user stories
+const formatTime = d3.timeFormat("%Y-%m-%d");
 
 
 /** DATA
@@ -161,7 +165,8 @@ function drawBarChart(data) {
                 .style("left", `${d3.event.layerX - 150}px`)
                 .style("top", `${d3.event.layerY - 80}px`)
                 // include a data-date property which describes the date of the connected rectangle element
-                .attr("data-date", d[0])
+                // date formatted through the defined format function
+                .attr("data-date", formatTime(d[0]))
                 .text(() => {
                     // d[0], as it is processed through the parse function, represents an instance of the date object
                     // getFullYear() allows to retrieve the four-digit year 
@@ -175,7 +180,8 @@ function drawBarChart(data) {
             tooltip
                 .style("opacity", 0);
         })
-        .attr("data-date", (d) => d[0])
+        // date formatted through the defined format function
+        .attr("data-date", (d) => formatTime(d[0]))
         .attr("data-gdp", (d) => d[1])
         // position the rectangle elements with increasing horizontal coordinate, each after the previous rectangle
         .attr("x", (d, i) => (width/ data.length) * i)
