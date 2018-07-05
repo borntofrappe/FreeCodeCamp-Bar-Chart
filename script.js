@@ -109,7 +109,10 @@ function drawBarChart(data) {
         .domain(d3.extent(data, d => d[0]));
         
         yScale
-        .domain(d3.extent(data, d => d[1]));
+        .domain(d3.extent(data, d => d[1]))
+        // thanks to the nice() function, the scale is set to start at 0 and end at 20.000
+        // applied to a domain, the function allows to avoid using the precise data points in favour of round, understandable numbers 
+        .nice();
        
     // AXES 
     // initialize the axes based on the scales

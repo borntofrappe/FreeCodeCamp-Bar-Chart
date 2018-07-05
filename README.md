@@ -18,12 +18,12 @@ Additionally, there exist a series of user-stories which must be satisfied for t
 1. [x] the chart should have two _g_ elements used to describe the horizontal and vertical axes. These should have _id="x-axis"_ and _id="y-axis"_ respectively. 
 1. [x] both axes should contain multiple labels, with _class="tick"_
 1. [x] the chart should have a _rect_ element for each data point and with _class="bar"_ 
-1. [ ] each bar should contain properties _data-date_ and _data-gdp_, describing the date and GDP value of each rectangle. These should match the provided data. 
+1. [x] each bar should contain properties _data-date_ and _data-gdp_, describing the date and GDP value of each rectangle. These should match the provided data. 
 1. [x] the rectangles' height should visually remark the amount described by the data.
 1. [ ] the _data-date_ attributes and corresponding bars should be aligned with the x-axis
 1. [x] the _data-gpd_ attributes and the connected bars should be aligned with the y-axis
 1. [x] on hover a tooltip with _id="tooltip"_ should be displayed with additional information
-1. [ ] the tooltip should also detail the data in the aforementioned attribute of data-date.
+1. [x] the tooltip should also detail the data in the aforementioned attribute of data-date.
 
 If that sounds long and at times confusing, the [live example](https://codepen.io/freeCodeCamp/full/GrZVaM) visually shows how the project should ultimately look and feel.
 
